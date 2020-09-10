@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:soapui-project id="3a67f8a2-1293-442c-803a-6be563d5538e" activeEnvironment="Default" name="REST Project 1" resourceRoot="" soapui-version="5.6.0" xmlns:con="http://eviware.com/soapui/config"><con:settings/><con:interface xsi:type="con:RestService" id="d7010b73-2c84-4ce3-b225-8b8a12732364" wadlVersion="http://wadl.dev.java.net/2009/02" name="https://api.spacexdata.com" type="rest" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:settings/><con:definitionCache type="TEXT" rootPart=""/><con:endpoints><con:endpoint>https://api.spacexdata.com</con:endpoint></con:endpoints><con:resource name="Latest" path="/v4/launches/latest" id="2fdfefc9-0a39-4222-b1b2-679a4e0abb78"><con:settings/><con:parameters/><con:method name="Latest 1" id="2e48e1b9-81ad-471d-b254-002231d8e798" method="GET"><con:settings/><con:parameters/><con:representation type="RESPONSE"><con:mediaType>application/json; charset=utf-8</con:mediaType><con:status>200</con:status><con:params/><con:element xmlns:lat="https://api.spacexdata.com/v4/launches/latest">lat:Response</con:element></con:representation><con:request name="Request 1" id="cafd5642-5056-4b08-8fa8-c6c866165a20" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://api.spacexdata.com</con:endpoint><con:request/><con:originalUri>https://api.spacexdata.com/v4/launches/latest</con:originalUri><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:request></con:method></con:resource></con:interface><con:testSuite id="30335721-2ba0-41e9-907d-db47bc52d07b" name="test1"><con:description>TestSuite generated for REST Service [https://api.spacexdata.com]</con:description><con:settings/><con:runType>SEQUENTIAL</con:runType><con:testCase id="815e29b7-3eea-4da5-a880-30f0175752ba" failOnError="true" failTestCaseOnErrors="true" keepSession="false" maxResults="0" name="GetSpaceXData" searchProperties="true"><con:description>TestCase generated for REST Resource [Latest] located at [/v4/launches/latest]</con:description><con:settings/><con:testStep type="restrequest" name="get" id="f5a5e447-e0a2-4c63-af61-a47e58f79912"><con:settings/><con:config service="https://api.spacexdata.com" resourcePath="/v4/launches/latest" methodName="Latest 1" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><con:restRequest name="Request 1" id="cafd5642-5056-4b08-8fa8-c6c866165a20" mediaType="application/json"><con:settings><con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting></con:settings><con:endpoint>https://api.spacexdata.com</con:endpoint><con:request/><con:originalUri>https://api.spacexdata.com/v4/launches/latest</con:originalUri><con:assertion type="GroovyScriptAssertion" id="1868e398-5114-47a0-a2d5-eeeb06206d0a" name="Script Assertion"><con:configuration/></con:assertion><con:credentials><con:authType>No Authorization</con:authType></con:credentials><con:jmsConfig JMSDeliveryMode="PERSISTENT"/><con:jmsPropertyConfig/><con:parameters/></con:restRequest></con:config></con:testStep><con:testStep type="groovy" name="AutoTest1" id="e847a296-fd9b-4811-87d0-cf555bd7f676"><con:settings/><con:config><script>import groovy.json.JsonSlurper
+
+def url = new URL("https://api.spacexdata.com/v4/launches/latest")
+def connection = url.openConnection()
+connection.requestMethod = 'GET'
+def responseCode=connection.responseCode
+if (responseCode == 200) {
+// log.info connection.content.text
+// log.info connection.contentType
+ log.info "response code is " + responseCode
+} else {
+  log.error "response code is " + responseCode
+}
+
+//if we dorectly parsing the result from test case
+//def getSpacexRes=testRunner.testCase.testSuite.testCases["GetSpaceXData"].testSteps["get"].getPropertyValue("Response")
+//def jsonSl=new JsonSlurper().parseText(getSpacexRes)
+
+def jsonSl=new JsonSlurper().parseText(connection.content.text)
+
+//test 1: get id, check success is true
+log.info "-------------Test1-----------"
+log.info jsonSl.id
+assert jsonSl.success==true
+if(jsonSl.success==true) {
+	log.info "Success is " + true
+}else{
+	log.error "Success is " + false
+}
+
+//test2: check ship count is 3 and get all ship ids
+log.info "-------------Test2-----------"
+def shipCount= jsonSl.ships.size()
+
+if(shipCount==3) {
+	log.info "ship count is " + shipCount
+}else{
+	log.error "ship count is " + shipCount
+}
+
+for (int index=0;index&lt;shipCount;index++){
+	log.info  "ship " + index + " is " + jsonSl.ships[index]
+}
+
+
+
+//test3: get name,local time and validate webcast contains youtubeid
+log.info "-------------Test3-----------"
+log.info jsonSl.name
+log.info jsonSl.date_local
+
+def webCasetUrl=jsonSl.links.webcast
+def youtubeId=jsonSl.links.youtube_id
+if(webCasetUrl.contains(youtubeId)) {
+	log.info  "webcast "+ webCasetUrl + " contains youtubeid " + youtubeId
+}else{
+	log.error  "webcast "+ webCasetUrl + " does not contain youtubeid " + youtubeId
+}
+
+
+</script></con:config></con:testStep><con:properties/></con:testCase><con:properties/></con:testSuite><con:properties/><con:wssContainer/><con:oAuth2ProfileContainer/><con:oAuth1ProfileContainer/></con:soapui-project>

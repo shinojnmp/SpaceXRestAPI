@@ -1,1 +1,1 @@
-# SpaceXRestAPI
+This testscript has created SoapUI Rest API automation groovy scripting
